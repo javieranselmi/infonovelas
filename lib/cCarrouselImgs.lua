@@ -16,84 +16,40 @@ CarrouselImgs.__index = CarrouselImgs -- las búsquedas fallidas de los métodos
 -- Métodos públicos
 ------------------------------------------------------------------------
 
-function CarrouselImgs.new()
+function CarrouselImgs.new(pImgPaths,pCurrentIndex)
 	local self = setmetatable({}, CarrouselImgs)
-
-	self._tPos = {x = 0, y = 0}
-	self._tSize = {w = 0, h = 0}
-	self._tMaxSize = {w = 0, h = 0}
-	
-	self._tParentCarrouselImgs = nil
+	self.tImgPaths = pImgPaths
+	self.tCurrentIndex = pCurrentIndex
+	self.arrowLeft = canvas:new('resources/left54x200.png')
+	self.arrowRight = canvas:new('resources/right54x200.png')
+    self.offsetImgs = 168
+	print('#####INFO##### Objeto CarrouselImgs instaciado correctamente' )
 	
 	return self
 end
 
 ------------------------------------------------------------------------
-function CarrouselImgs:position(x, y)
+function CarrouselImgs:currentIndex(value)
 	-- SET
-	if x and y then
-		self._tPos = {x = x, y = y}
-
+	if value then
+		self.tCurrentIndex = value
 	-- GET
 	else
-		return self._tPos.x, self._tPos.y
-
+		return self.tCurrentIndex
 	end
 end
 
 ------------------------------------------------------------------------
-function CarrouselImgs:maxSize(width, height)
-	-- SET
-	if width and height then
-		width = math.min(math.floor(width + .5), k_nMainCanvasW)
-		height = math.min(math.floor(height + .5), k_nMainCanvasH)
-		
-		self._tMaxSize = {w = width, h = height}
+function CarrouselImgs:reDraw()
 
-	-- GET
-	else
-		return self._tMaxSize.w, self._tMaxSize.h
-
+	for i=0, 2 do
+		image = canvas:new(self.tImgPaths[self.tCurrentIndex - 1 + i ])
+		canvas:compose( 126 + i*self.offsetImgs , 320, image)
 	end
-end
+	canvas:compose( 54 , 320, self.arrowLeft)
+	canvas:compose( 630 , 320, self.arrowRight)
 
+	print('#####INFO##### Se ha redibujado un objeto CarrouselImgs.')
+
+end
 ------------------------------------------------------------------------
-function CarrouselImgs:size()
-	return self._tSize.w, self._tSize.h
-end
-
-------------------------------------------------------------------------
-function CarrouselImgs:parent(CarrouselImgs)
-	-- SET
-	if CarrouselImgs then
-		self._tParentCarrouselImgs = CarrouselImgs
-
-	-- GET
-	else
-		return self._tParentCarrouselImgs
-
-	end
-end
-
-------------------------------------------------------------------------
-function CarrouselImgs:draw()
-	if self._tParentCarrouselImgs then
-		local nXP, nYP = self._tParentCarrouselImgs:position()
-		local nWP, nHP = self._tParentCarrouselImgs:maxSize()
-		local nX2P = nXP + nWP
-		local nY2P = nYP + nHP
-		local nX2C = self._tPos.x + self._tMaxSize.w
-		local nY2C = self._tPos.y + self._tMaxSize.h
-		
-		local nX = math.max(nXP, self._tPos.x)
-		local nY = math.max(nYP, self._tPos.y)
-		local nW = math.min(nX2P, nX2C) - nX
-		local nH = math.min(nY2P, nY2C) - nY
-
-		_attrClip( canvas, nX, nY, nW, nH )
-		
-	else
-		_attrClip( canvas, self._tPos.x, self._tPos.y, self._tMaxSize.w, self._tMaxSize.h )
-
-	end
-end
